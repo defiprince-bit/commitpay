@@ -1,0 +1,45 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+/* Theme tokens (RGB channels). Dark = default; html.light = light mode. */
+:root { --bg: 11 18 32; --mkbg: 5 5 5; --surface: 18 26 43; --surface2: 26 36 56; --line: 42 53 72; --ink: 244 247 251; --muted: 139 151 171; color-scheme: dark;
+  --grid-bg: #121A2B; --grid-fg: #F4F7FB; --grid-head: #1A2438; --grid-line: #2A3548; }
+html.light { --bg: 247 248 250; --mkbg: 250 250 251; --surface: 255 255 255; --surface2: 241 243 246; --line: 226 230 236; --ink: 11 18 32; --muted: 94 106 124; color-scheme: light;
+  --grid-bg: #FFFFFF; --grid-fg: #0B1220; --grid-head: #F1F3F6; --grid-line: #E2E6EC; }
+html, body { transition: background-color .25s ease, color .25s ease; }
+body { @apply bg-bg text-ink font-sans antialiased; }
+.card { @apply bg-surface border border-line rounded-card p-6 shadow-card transition-[border-color,box-shadow,transform] duration-300; }
+.card-hover { @apply hover:border-brand/40 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_#0070E033,0_16px_40px_-20px_#0070E080]; }
+.card-hero { @apply card shadow-hero relative overflow-hidden; background-image: radial-gradient(600px 200px at 0% 0%, #0070E01F, transparent 70%); }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none; }
+.btn-primary { @apply btn bg-brand text-white hover:bg-[#0062C4] hover:-translate-y-px shadow-[0_6px_20px_-8px_#0070E0]; }
+.btn-ghost { @apply btn border border-line text-ink hover:bg-surface2 hover:border-muted/40; }
+.btn-danger { @apply btn bg-danger text-white; }
+.label { @apply block text-sm text-muted mb-2; }
+.eyebrow { @apply text-[11px] uppercase tracking-[0.12em] text-muted; }
+.input { @apply w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-ink outline-none transition-colors duration-150 focus:border-brand focus:ring-4 focus:ring-brand/15; }
+.amount { font-variant-numeric: tabular-nums lining-nums; @apply font-mono font-semibold tracking-[-0.03em]; }
+h1,h2,.display { @apply font-display tracking-[-0.035em]; }
+.btn:active { transform: scale(0.97); }
+.btn-primary:hover { box-shadow: 0 10px 30px -8px #0070E0; }
+.nav-item { @apply flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink hover:bg-surface2 hover:translate-x-0.5 transition-all; }
+.nav-active { @apply bg-brand-soft text-ink hover:bg-brand-soft; box-shadow: inset 2px 0 0 #0070E0; }
+.seg { @apply btn-ghost flex-1 !py-2.5; } .seg-on { @apply !border-brand bg-brand-soft; }
+.fade { animation: fade 180ms ease-out; } @keyframes fade { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } }
+.btn-primary:focus-visible, .btn-ghost:focus-visible, .btn-danger:focus-visible, .nav-item:focus-visible { @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-bg; }
+
+@keyframes softpulse { 0%,100% { box-shadow: 0 0 0 0 currentColor } 50% { box-shadow: 0 0 0 6px transparent } }
+.pulse-chip { animation: softpulse 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+/* v5 — Keel story + iOS */
+html { scroll-behavior: smooth; }
+.mk-em { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-weight: 400; color: #0070E0; letter-spacing: -0.02em; }
+.mk-mono { @apply font-mono uppercase tracking-[0.18em]; }
+.mk-btn-primary { @apply inline-flex items-center gap-2 h-12 px-7 rounded-full bg-ink text-bg font-medium transition-all duration-200 hover:bg-ink/90 hover:-translate-y-px active:scale-[0.97]; }
+.mk-btn-ghost { @apply inline-flex items-center gap-2 h-12 px-7 rounded-full border border-ink/15 text-ink transition-all duration-200 hover:bg-ink/5 hover:border-ink/30 active:scale-[0.97]; }
+.card { border-radius: 20px; }
+.eyebrow { letter-spacing: 0.14em; }
+.verdict-em, .serif-em { font-family: var(--font-serif), Georgia, serif; font-style: italic; color: #0070E0; }
+
+html.light .shadow-card, html.light .card { box-shadow: 0 1px 2px #0B12200A, 0 8px 24px -16px #0B122026; }
+.theme-toggle { @apply inline-grid place-items-center w-11 h-11 rounded-full border border-ink/10 text-muted hover:text-ink hover:bg-ink/5 transition-colors; }
+@media (max-width: 767px) { .btn { min-height: 44px; } .input { font-size: 16px; } }
