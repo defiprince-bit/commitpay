@@ -1,11 +1,21 @@
 import Database from "better-sqlite3";
 import { randomUUID } from "crypto";
+import fs from "fs";
+import path from "path";
 
-// Schema mirrors /workspace/commitpay/design.md §3
+// DATABASE_URL: file:./commitpay.db (local) or file:/data/commitpay.db (Render disk)
+export function dbPath(url = process.env.DATABASE_URL || "file:./commitpay.db") {
+  let f = url.replace(/^file:(\/\/)?/, "");
+  if (url.startsWith("file://") && !f.startsWith("/") && !f.startsWith(".")) f = "/" + f;
+  return path.resolve(process.cwd(), f);
+}
+
+// Schema mirrors docs/design.md §3
 let _db: Database.Database | null = null;
 export function db() {
   if (_db) return _db;
-  const file = (process.env.DATABASE_URL || "file:./commitpay.db").replace(/^file:/, "");
+  const file = dbPath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   _db = new Database(file);
   _db.pragma("journal_mode = WAL");
   _db.exec(`
