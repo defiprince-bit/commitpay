@@ -1,1 +1,1 @@
-const c={serverExternalPackages:["better-sqlite3"]};export default c;
+const c={serverExternalPackages:["@libsql/client","libsql"]};export default c;

@@ -1,17 +1,17 @@
 # CommitPay — DevOps (free deploy + webhooks + sandbox)
 
-**Target (decided Oct 31 WAT):** Render Web Service + persistent disk `/data` (`render.yaml` in repo). Vercel only after DB moves off better-sqlite3 (Turso/Postgres) — see "Decision" below.  
+**Target (decided Oct 31 WAT, revised):** **Turso free + Vercel Hobby — $0, persistent data.** `lib/db.ts` uses `@libsql/client`: local `file:./commitpay.db`, prod `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`.  
 **Stack:** Next.js App Router · PayPal sandbox · free LLM · $0.
 
-## (Deferred) Vercel — not used while on better-sqlite3
+## Primary: Turso + Vercel ($0)
 
-1. New GitHub repo `commitpay` (public or private; judges need read access if private).
-2. Import into Vercel → Framework Preset **Next.js** → root directory `/`.
-3. Set env vars from `env.example` (Production + Preview).
-4. Deploy. Note the production URL: `https://<project>.vercel.app` (or custom domain later).
-5. Set `NEXT_PUBLIC_APP_URL` to that exact HTTPS origin and redeploy once.
+1. Turso (free, no card): create DB `commitpay` + token — or Vercel → Storage → Marketplace → Turso. Env: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`.
+2. Vercel → Import `defiprince-bit/commitpay` → Next.js defaults → paste env (see `env.example`; don't set `DATABASE_URL` in prod) → Deploy.
+3. Set `NEXT_PUBLIC_APP_URL=https://<project>.vercel.app` → Redeploy.
+4. PayPal webhook → `https://<project>.vercel.app/api/paypal/webhook` → `PAYPAL_WEBHOOK_ID` → Redeploy.
+5. Schema bootstraps itself on first request.
 
-**Why Vercel:** free HTTPS, serverless routes for PayPal webhooks, zero cost for hackathon traffic.
+Vercel Hobby is non-commercial-use only — fine for the hackathon. Caveat: request bodies max ~4.5 MB on Vercel functions (proof images are data URLs).
 
 ## Webhook URL plan
 
@@ -67,19 +67,9 @@ OK to defer: custom domain, preview webhooks, fancy observability.
 
 ---
 
-## Decision (Oct 31 WAT): **Render** (not Vercel yet)
+## Alternatives considered (Oct 31 WAT)
 
-**Why:** app uses `better-sqlite3` (`lib/db.ts`). Vercel serverless can’t use a local SQLite file without migrating to Turso/libSQL or Postgres. Render free web service + **persistent disk** keeps current DB code and gives public HTTPS for PayPal webhooks tonight.
-
-**Turso + Vercel** stays the upgrade path if we migrate `lib/db.ts` off `better-sqlite3` later — don’t block webhook/demo on that.
-
-### Render checklist
-1. New Web Service from GitHub `commitpay` (or deploy from `/workspace/commitpay/app`).
-2. Build: `npm install && npm run build` · Start: `npm start` · Node 20.
-3. Attach a 1 GB persistent disk at `/data`; set `DATABASE_URL=file:/data/commitpay.db`. **Disks need a paid instance (Starter ~$7/mo)**; on Free, omit the disk — DB is ephemeral and resets on deploy/spin-down.
-   Easiest: Dashboard → New → **Blueprint** → repo → uses `render.yaml`.
-4. Env: US Business sandbox `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` (not the locked NG Default Application), `NEXT_PUBLIC_APP_URL=https://<service>.onrender.com`, AI keys, `SESSION_SECRET`.
-5. After first deploy: PayPal Dashboard → Webhooks → `https://<service>.onrender.com/api/paypal/webhook` → copy ID → `PAYPAL_WEBHOOK_ID` → redeploy/restart.
-6. Cold starts on free tier: hit the URL before demo; webhooks may retry if the instance was asleep.
-
-**Hold:** do not create the Vercel project until DB is Turso/Postgres.
+- **Render Starter + disk (~$7/mo): OFF THE TABLE** — cost. `render.yaml` removed from the repo.
+- **Render Free:** no persistent disk → SQLite wipes on every deploy/spin-down (~15 min idle). Last resort only (e.g. Turso outage); you'd lose all pledges. With libSQL you could instead point Render Free at Turso — persistent, but cold starts make PayPal webhooks retry.
+- **Railway Free:** $1/mo credit + 0.5 GB volume, but an always-on Next.js server burns past $1 quickly. Optional only if Douglas still has Railway Hobby credit left over from NairaGuard.
+- **Primary = Turso + Vercel.**

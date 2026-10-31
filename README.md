@@ -5,7 +5,7 @@ Accept → **void**. Reject → **capture** + **Payouts** to the beneficiary. On
 
 Docs: [`docs/plan.md`](docs/plan.md) · [`docs/design.md`](docs/design.md) · [`docs/ui-screen-map.md`](docs/ui-screen-map.md) · [`docs/brand/visual-system.md`](docs/brand/visual-system.md) · [`docs/devops.md`](docs/devops.md)
 
-Requires **Node 20** (`.nvmrc`). `better-sqlite3` is a native module; it builds on `npm install` (prebuilt binaries for Linux/macOS x64/arm64).
+Requires **Node 20** (`.nvmrc`). `@libsql/client` is a native module; it builds on `npm install` (prebuilt binaries for Linux/macOS x64/arm64).
 
 ## Run
 ```bash
@@ -31,13 +31,17 @@ Payout receivers must be sandbox PayPal emails (edit `CHARITIES` in `app/pledge/
 - API: `POST /api/pledges`, `POST /api/pledges/[id]/{capture-auth,proof,judge,escape/start,escape/message}`, `GET /api/pledges/[id]`, `GET /api/dashboard`, `POST /api/paypal/webhook`
 - Screens: `/` S0 · `/pledge/new` S1 · `/pledge/[id]` S2 · `/pledge/[id]/proof` S3 · `/pledge/[id]/verdict` S4a/S4b · `/pledge/[id]/escape` S5 · `/dashboard` S6
 
-## Deploy on Render
-Uses `better-sqlite3` → needs a long-running Node server + disk (not Vercel serverless).
+## Deploy ($0): Turso free + Vercel Hobby
+Local dev keeps a plain SQLite file (`DATABASE_URL=file:./commitpay.db`). Production uses a free Turso (hosted libSQL) DB so data survives serverless cold starts. No card needed for either. Vercel Hobby is "non-commercial" — fine for a hackathon demo.
 
-1. Render Dashboard → **New → Blueprint** → connect GitHub `defiprince-bit/commitpay` → it reads `render.yaml` (web service `commitpay`, Node 20, disk `/data`, `DATABASE_URL=file:/data/commitpay.db`).
-   - Manual alternative: New → Web Service · Build `npm ci && npm run build` · Start `npm start` · env `NODE_VERSION=20` · Disks → mount `/data` (1 GB).
-   - Persistent disks need a paid instance (Starter). On **Free**, set plan free and remove the disk; data resets on deploy/spin-down.
-2. Fill the prompted secrets (dashboard only, never in git): `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` (US Business sandbox app), `GROQ_API_KEY` or `GEMINI_API_KEY` (optional), `NEXT_PUBLIC_APP_URL=https://<service>.onrender.com`. `SESSION_SECRET` is auto-generated. Blank PayPal/AI keys = demo mode.
-3. Deploy → open `https://<service>.onrender.com`.
-4. PayPal Developer → your sandbox app → Webhooks → add `https://<service>.onrender.com/api/paypal/webhook` (all events or PAYMENT.* / PAYOUTS*) → copy Webhook ID → set `PAYPAL_WEBHOOK_ID` → Manual Deploy / restart.
-5. Smoke test: create pledge → authorize → proof → verdict → `/dashboard`.
+1. **Turso DB** (pick one):
+   - Vercel route (easiest): after step 2, Vercel project → **Storage → Marketplace → Turso → Create** (free plan) → connect to project. It injects the DB URL + token; make sure the names are `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` (rename in Settings → Environment Variables if Vercel used a different prefix).
+   - Turso direct: sign up at https://turso.tech (GitHub login, free) → Create Database `commitpay` (any region near the US, e.g. `aws-us-east-1`) → copy the `libsql://…turso.io` URL → **Create Token** (read/write). CLI alternative: `turso db create commitpay && turso db show commitpay --url && turso db tokens create commitpay`.
+   - Tables are created automatically on first request (`CREATE TABLE IF NOT EXISTS`).
+2. **Vercel**: https://vercel.com/new → Import GitHub `defiprince-bit/commitpay` → Framework Next.js, defaults → add env vars (Production):
+   `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `PAYPAL_MODE=sandbox`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` (US Business sandbox app), `GROQ_API_KEY` or `GEMINI_API_KEY`, `SESSION_SECRET` (long random string), `FEATURE_ANTI_CHEAT=1`, `FEATURE_ESCAPE_HATCH=1`. Do **not** set `DATABASE_URL` on Vercel. → **Deploy**.
+3. Copy the production URL (`https://commitpay-xxx.vercel.app`) → set `NEXT_PUBLIC_APP_URL` to it (no trailing slash) → Deployments → **Redeploy**.
+4. **PayPal webhook**: Developer Dashboard → sandbox app → Webhooks → Add `https://<your-app>.vercel.app/api/paypal/webhook` (PAYMENT.* + PAYOUTS events) → copy Webhook ID → set `PAYPAL_WEBHOOK_ID` on Vercel → Redeploy.
+5. Smoke test: create pledge → authorize → proof → verdict → `/dashboard`; check rows in Turso dashboard → Data/Shell.
+
+Notes: proof images are stored inline (data URL) in the DB; Vercel caps request bodies at ~4.5 MB, so keep uploads ≲3 MB. Fallbacks/costs: see `docs/devops.md`.
