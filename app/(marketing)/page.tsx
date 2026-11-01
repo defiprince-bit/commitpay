@@ -25,14 +25,26 @@ export default function Landing() {
   return (<>
     <MarketingNav />
     <section className="relative min-h-[100svh] overflow-hidden">
-      <div className="mx-auto max-w-[1200px] px-6 min-h-[100svh] grid md:grid-cols-2 items-center gap-0 md:gap-6 pt-28 md:pt-24 pb-16 md:pb-0">
+      {/* Ambient depth — soft brand glows so hero isn’t flat */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 -left-20 w-[520px] h-[520px] rounded-full bg-brand/20 blur-[110px]" />
+        <div className="absolute top-1/3 -right-16 w-[640px] h-[640px] rounded-full bg-brand/15 blur-[130px]" />
+        <div className="absolute bottom-0 left-1/3 w-[420px] h-[280px] rounded-full bg-brand/10 blur-[100px]" />
+      </div>
+      <div className="relative mx-auto max-w-[1200px] px-6 min-h-[100svh] grid md:grid-cols-2 items-center gap-0 md:gap-6 pt-24 md:pt-24 pb-10 md:pb-0">
         <Reveal className="relative z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-ink/[0.03] px-3 py-1.5 mk-mono text-[10px] text-muted"><span className="w-1.5 h-1.5 rounded-full bg-brand pulse-chip text-brand" />PAYPAL AI HACKATHON</div>
-          <h1 className="mt-8 text-[2.75rem] sm:text-[3.2rem] md:text-[5.2rem] font-light tracking-[-0.05em] leading-[0.95]">Stake money<br />on a habit.<br /><Em>Or lose it.</Em></h1>
-          <p className="mt-8 text-lg text-muted max-w-[420px] leading-relaxed">PayPal holds your stake. An AI referee checks your proof. Show up and it’s voided — miss and it’s paid forward.</p>
-          <div className="mt-10 flex flex-wrap gap-3"><Link href="/pledge/new" className="mk-btn-primary">Open the app <ArrowRight size={16} /></Link><a href="#how" className="mk-btn-ghost">How it works</a></div>
+          <div className="relative rounded-[28px] border border-ink/10 bg-surface/40 backdrop-blur-2xl shadow-[0_8px_40px_-16px_rgb(0_0_0/0.35),inset_0_1px_0_0_rgb(255_255_255/0.08)] p-6 sm:p-8 md:p-10 overflow-hidden">
+            <div aria-hidden className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-brand/25 blur-3xl" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 rounded-full bg-brand/10 blur-3xl" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-ink/[0.04] backdrop-blur px-3 py-1.5 mk-mono text-[10px] text-muted"><span className="w-1.5 h-1.5 rounded-full bg-brand pulse-chip text-brand" />PAYPAL AI HACKATHON</div>
+              <h1 className="mt-5 sm:mt-8 text-[2.4rem] sm:text-[3.2rem] md:text-[5.2rem] font-light tracking-[-0.05em] leading-[0.95]">Stake money<br />on a habit.<br /><Em>Or lose it.</Em></h1>
+              <p className="mt-5 sm:mt-8 text-base sm:text-lg text-muted max-w-[420px] leading-relaxed">PayPal holds your stake. An AI referee checks your proof. Show up and it’s voided — miss and it’s paid forward.</p>
+              <div className="mt-6 sm:mt-10 flex flex-wrap gap-3"><Link href="/pledge/new" className="mk-btn-primary">Open the app <ArrowRight size={16} /></Link><a href="#how" className="mk-btn-ghost">How it works</a></div>
+            </div>
+          </div>
         </Reveal>
-        <div className="relative h-[540px] md:h-[800px] -mx-6 md:-mr-16 md:ml-0"><ParticleOrb /></div>
+        <div className="relative h-[320px] sm:h-[420px] md:h-[800px] -mx-6 -mt-10 md:mt-0 md:-mr-16 md:ml-0"><ParticleOrb /></div>
       </div>
       <a href="#problem" className="hidden md:inline-flex absolute bottom-8 left-1/2 -translate-x-1/2 items-center gap-2 rounded-full border border-ink/10 bg-mkbg/60 backdrop-blur px-4 py-2 mk-mono text-[10px] text-muted hover:text-ink transition-colors">SCROLL <ChevronDown size={13} className="animate-bounce" /></a>
     </section>
