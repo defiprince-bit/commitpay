@@ -12,7 +12,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { answer } = await req.json();
   if (!answer?.trim()) return NextResponse.json({ error: "Answer required" }, { status: 400 });
   const transcript: Turn[] = [...JSON.parse(s.transcript), { role: "user", content: String(answer).slice(0, 1000) }];
-  const t = await escapeTurn(p.goal, transcript);
+  let t;
+  try {
+    t = await escapeTurn(p.goal, transcript);
+  } catch (e) {
+    return NextResponse.json({ error: `AI judge unavailable: ${String(e).slice(0, 180)}` }, { status: 502 });
+  }
   if (t.question) transcript.push({ role: "assistant", content: t.question });
   else transcript.push({ role: "assistant", content: t.reason || "" });
   (await run("UPDATE escape_sessions SET transcript=?, verdict=? WHERE id=?", [JSON.stringify(transcript), t.verdict || "pending", s.id]));

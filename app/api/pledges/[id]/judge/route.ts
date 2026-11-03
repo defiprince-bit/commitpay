@@ -12,7 +12,12 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const proof = (await get("SELECT * FROM proofs WHERE pledge_id=? AND ai_verdict='pending' ORDER BY created_at DESC LIMIT 1", [id])) as any;
   if (!proof) return NextResponse.json({ error: "No pending proof" }, { status: 409 });
   const note = (JSON.parse(proof.ai_reasons) as string[]).find((r) => r.startsWith("note:"))?.slice(5);
-  const v = await judgeProof(p.goal, { storageUrl: proof.storage_url, sourceUrl: proof.source_url, note });
+  let v;
+  try {
+    v = await judgeProof(p.goal, { storageUrl: proof.storage_url, sourceUrl: proof.source_url, note });
+  } catch (e) {
+    return NextResponse.json({ error: `AI judge unavailable: ${String(e).slice(0, 180)}` }, { status: 502 });
+  }
   (await run("UPDATE proofs SET ai_verdict=?, ai_reasons=?, critic_flags=? WHERE id=?", [v.verdict, JSON.stringify(v.reasons), JSON.stringify(v.flags), proof.id]));
   try {
     const after = v.verdict === "accept" ? await releaseHold(id) : await captureAndPayout(id);
