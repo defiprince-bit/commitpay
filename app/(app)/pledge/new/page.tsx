@@ -4,8 +4,8 @@ import { Wallet, Target, HeartHandshake, Lock } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 const CHARITIES = [
-  { label: "Sandbox Business US (payout)", email: "sb-fyfgf53562255@business.example.com" },
-  { label: "GiveDirectly (placeholder)", email: "sb-fyfgf53562255@business.example.com" },
+  { label: "Sandbox Business US (payout)", email: "sb-k45zm53656009@business.example.com" },
+  { label: "GiveDirectly (placeholder)", email: "sb-k45zm53656009@business.example.com" },
 ];
 export default function NewPledge() {
   const r = useRouter();
